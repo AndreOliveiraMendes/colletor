@@ -1,10 +1,12 @@
 import json
+import os
 
-from config import LOG
+from config import LOG_FOLDER
 
 
-def log_data(data):
-    if not LOG:
+def log_data(data, filename):
+    if not LOG_FOLDER or not filename:
         return
-    with open(LOG, "a", encoding='utf-8') as f:
+    LOG_FILE = os.path.join(LOG_FOLDER, filename)
+    with open(LOG_FILE, "a", encoding='utf-8') as f:
         f.write(json.dumps(data) + "\n")
