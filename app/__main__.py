@@ -4,10 +4,14 @@ from app.log import log_data
 
 
 def main():
-    # temperature
-    data = get_cpu_temps()
+    # temperature of cpu
+    datas = get_cpu_temps()
     
-    print(data)
+    for data in datas:
+        name, value = data
+        print(name, value)
+        
+        log_data(data, "cpu_temperature")
     
 if __name__ == "__main__":
     main()
