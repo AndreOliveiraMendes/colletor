@@ -1,6 +1,7 @@
 from app.battery import get_power
 from app.cpu import get_cpu_temps
 from app.log import log_data
+from datetime import datetime
 
 
 def main():
@@ -9,8 +10,10 @@ def main():
     
     for data in datas:
         name, value = data
-        print(name, value)
         
+        logged_data = copy(data)
+        logged_data["timestamp"] = datetime.now()
+
         log_data(data, "cpu_temperature")
     
 if __name__ == "__main__":
