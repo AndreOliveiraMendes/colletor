@@ -43,6 +43,10 @@ def run():
         }
         
         log_data(logged_data, "disk_temperature")
+
+        real_name = name.strip("/").split("/")[1]
+
+        print(real_name, name, value)
         
     if send_datas:    
         send_to_api(send_datas)
