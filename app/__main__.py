@@ -16,7 +16,7 @@ def main():
         logged_data = copy(data)
         logged_data += (datetime.now(),)
 
-        log_data(data, "cpu_temperature")
+        log_data(logged_data, "cpu_temperature")
     
 if __name__ == "__main__":
     main()
