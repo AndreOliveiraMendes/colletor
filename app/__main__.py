@@ -1,3 +1,5 @@
+from copy import copy
+
 from app.battery import get_power
 from app.cpu import get_cpu_temps
 from app.log import log_data
