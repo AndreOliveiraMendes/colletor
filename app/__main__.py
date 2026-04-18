@@ -1,11 +1,12 @@
 from datetime import datetime
-
 from app.battery import get_power
 from app.cpu import get_cpu_temps
 from app.log import log_data
 from app.sender import send_to_api
 from config import HOSTIP, HOSTNAME
+import os
 
+os.umask(0o022)
 
 def main():
     datas = get_cpu_temps()
