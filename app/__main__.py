@@ -14,7 +14,7 @@ def main():
         name, value = data
         
         logged_data = copy(data)
-        logged_data["timestamp"] = datetime.now()
+        logged_data += (datetime.now(),)
 
         log_data(data, "cpu_temperature")
     
