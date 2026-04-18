@@ -3,30 +3,32 @@ import subprocess
 
 def get_real_disks():
     result = subprocess.run(
-        ["lsblk", "-dn", "-o", "NAME,TYPE"],
+        ["lsblk", "-dn", "-o", "NAME,TYPE,SIZE"],
         capture_output=True,
         text=True
     )
 
     disks = []
     for line in result.stdout.splitlines():
-        name, dtype = line.split()
-        if dtype == "disk":
+        name, dtype, size = line.split()
+
+        if dtype == "disk" and size != "0B":
             disks.append(f"/dev/{name}")
 
     return disks
 
-def get_disk_temp(disk="/dev/sda"):
-    result = subprocess.run(
-        ["smartctl", "-A", disk],
-        capture_output=True,
-        text=True
-    )
+def get_disk_smart(disk):
+    commands = [
+        ["sudo", "smartctl", "-A", disk],              # direto
+        ["sudo", "smartctl", "-A", "-d", "sat", disk], # USB
+    ]
 
-    match = re.search(r"Temperature.*?(\d+)", result.stdout)
-    if match:
-        return int(match.group(1))
-    
+    for cmd in commands:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if "Temperature" in result.stdout:
+            return result.stdout
+
     return None
 
 def get_all_disk_temps():
@@ -34,7 +36,7 @@ def get_all_disk_temps():
     temps = {}
 
     for d in disks:
-        temp = get_disk_temp(d)
+        temp = get_disk_smart(d)
         if temp is not None:
             temps[d] = temp
         else:
