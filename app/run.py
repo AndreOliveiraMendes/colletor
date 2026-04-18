@@ -46,7 +46,19 @@ def run():
 
         real_name = name.strip("/").split("/")[1]
 
-        print(real_name, name, value)
+        if value is not None:
+            send_data = {
+                "type": "temperature",
+                "source": "local",
+                "host_name": HOSTNAME,
+                "host_ip": HOSTIP,
+                "device_type": "DISK",
+                "name": real_name,
+                "value": value,
+                "meta": name
+            }
+            
+            send_datas.append(send_data)
         
     if send_datas:    
         send_to_api(send_datas)
