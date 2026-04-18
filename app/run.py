@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from app.battery import get_power
 from app.cpu import get_cpu_temps
+from app.disk import get_all_disk_temps
 from app.log import log_data
 from app.sender import send_to_api
 from config import HOSTIP, HOSTNAME
@@ -9,6 +9,8 @@ from config import HOSTIP, HOSTNAME
 
 def run():
     datas = get_cpu_temps()
+    
+    send_datas = []
     
     for name, value in datas:
         logged_data = {
@@ -29,7 +31,21 @@ def run():
             "value": value
         }
         
-        send_to_api(send_data)
+        send_datas.append(send_data)
+        
+    datas = get_all_disk_temps()
+    
+    for name, value in datas.items():
+        logged_data = {
+            "timestamp": datetime.now().isoformat(),
+            "core": name,
+            "temperature": value
+        }
+        
+        log_data(logged_data, "disk_temperature")
+        
+    if send_datas:    
+        send_to_api(send_datas)
         
 """
             id INTEGER PRIMARY KEY AUTOINCREMENT,
