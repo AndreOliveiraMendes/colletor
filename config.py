@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE = os.getenv("BASE")
-SERVER = os.getenv("SERVER")
-LOG_FOLDER = os.getenv("LOG_FOLDER")
+BASE = os.getenv("BASE", "/sys/class/power_supply")
+SERVER = os.getenv("SERVER", "server")
+LOG_FOLDER = os.getenv("LOG_FOLDER", "/var/log")
 
 
 def get_host_ip():
