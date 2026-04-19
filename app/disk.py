@@ -39,6 +39,7 @@ def get_disk_temp(disk):
     commands = [
         ["sudo", "smartctl", "-A", disk],              # direto
         ["sudo", "smartctl", "-A", "-d", "sat", disk], # USB
+        ["sudo", "smartctl", "-A", "-d", "scsi", disk]
     ]
 
     for cmd in commands:
