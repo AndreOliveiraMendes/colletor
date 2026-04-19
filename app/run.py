@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from app.battery import get_power
 from app.cpu import get_cpu_temps
 from app.disk import get_all_disk_temps
 from app.log import log_data
@@ -7,10 +8,10 @@ from app.sender import send_to_api
 from config import HOSTIP, HOSTNAME
 
 
-def build_send_data(device_type, name, value, meta=None):
+def build_send_data(info_type, info_source, device_type, name, value, meta=None):
     data = {
-        "type": "temperature",
-        "source": "local",
+        "type": info_type,
+        "source": info_source,
         "host_name": HOSTNAME,
         "host_ip": HOSTIP,
         "device_type": device_type,
@@ -39,7 +40,7 @@ def run():
         )
 
         send_datas.append(
-            build_send_data("CPU", name, value)
+            build_send_data("temperature", "local", "CPU", name, value)
         )
 
     # 🔹 DISK
@@ -58,8 +59,44 @@ def run():
 
         if value is not None:
             send_datas.append(
-                build_send_data("DISK", real_name, value, meta=path)
+                build_send_data("temperature", "local", "DISK", real_name, value, meta=path)
             )
+            
+    # 🔹 BATTERY (todo: add suport for multiple batteries)
+    data = get_power()
+    
+    timestamp = data.get("timestamp")
+    ac_connected = data.get("ac_online")
+    status = data.get("status")
+    value = data.get("capacity")
+    
+    log_data(
+        {
+            "timestamp": timestamp,
+            "ac_connected": ac_connected,
+            "status": status,
+            "value": value
+        },
+        "battery"
+    )
+    
+    if value:
+        send_datas.append(
+            build_send_data("battery", "local", None, None, value, data)
+        )
 
     if send_datas:
         send_to_api(send_datas)
+
+"""
+    type TEXT NOT NULL,
+    source TEXT NOT NULL,
+    host_name TEXT NOT NULL,
+    host_ip TEXT NOT NULL,
+    target TEXT,
+    device_type TEXT,
+    name TEXT,
+    value REAL,
+    value_text TEXT,
+    meta TEXT
+"""

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from config import BASE
 
+
 def read(path):
     try:
         with open(path) as f:
