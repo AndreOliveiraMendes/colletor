@@ -47,6 +47,7 @@ def run():
     for path, value in get_all_disk_temps().items():
         real_name = path.split("/")[-1]  # mais simples
 
+        path = "disk_temperature" if value else "disk_temperature_strange"
         log_data(
             {
                 "timestamp": timestamp,
@@ -54,7 +55,7 @@ def run():
                 "temperature": value,
                 "device": path
             },
-            "disk_temperature"
+            path
         )
 
         if value is not None:
