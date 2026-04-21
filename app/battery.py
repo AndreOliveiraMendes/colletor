@@ -1,15 +1,9 @@
 import os
 from datetime import datetime
 
+from app.utils import read
 from config import HWMON_PATH
 
-
-def read(path):
-    try:
-        with open(path) as f:
-            return f.read().strip()
-    except:
-        return None
 
 def find_power_devices():
     ac_path = None
