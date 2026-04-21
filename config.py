@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE = os.getenv("BASE", "/sys/class/power_supply")
+BASE_SYS = os.getenv("BASE_SYS", "/sys/class/")
+HWMON_PATH = os.path.join(BASE_SYS, 'power_supply')
+POWER_PATH = os.path.join(BASE_SYS, 'hwmon')
 SERVER = os.getenv("SERVER", "server")
 LOG_FOLDER = os.getenv("LOG_FOLDER", "/var/log")
 

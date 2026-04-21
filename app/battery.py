@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from config import BASE
+from config import HWMON_PATH
 
 
 def read(path):
@@ -15,8 +15,8 @@ def find_power_devices():
     ac_path = None
     bat_path = None
 
-    for dev in os.listdir(BASE):
-        dev_path = os.path.join(BASE, dev)
+    for dev in os.listdir(HWMON_PATH):
+        dev_path = os.path.join(HWMON_PATH, dev)
         dev_type = read(os.path.join(dev_path, "type"))
 
         if dev_type == "Mains":
