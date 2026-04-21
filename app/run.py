@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from app.battery import get_power
-from app.cpu import get_cpu_temps
+from app.cpu import get_cpu_temps_hwmon
 from app.disk import get_all_disk_temps
 from app.log import log_data
 from app.sender import send_to_api
@@ -29,7 +29,7 @@ def run():
     send_datas = []
 
     # 🔹 CPU
-    for name, value in get_cpu_temps():
+    for name, value in get_cpu_temps_hwmon():
         log_data(
             {
                 "timestamp": timestamp,
