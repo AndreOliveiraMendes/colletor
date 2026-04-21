@@ -24,3 +24,6 @@ def get_host_ip():
 
 HOSTNAME = os.getenv("HOSTNAME", socket.gethostname())
 HOSTIP = os.getenv("HOSTIP") or get_host_ip()
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
