@@ -1,5 +1,22 @@
 import subprocess
 
+from app.cache import load_cache, save_cache
+
+CACHE = load_cache()
+
+def detect_device_type(disk):
+    types = ["auto", "sat", "sat,12", "sat,16", "scsi"]
+
+    for t in types:
+        cmd = ["sudo", "smartctl", "-A", "-d", t, disk, "-T", "permissive"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.stdout:
+            temp = extract_temperature(result.stdout)
+            if temp is not None:
+                return t
+
+    return None
 
 def get_real_disks():
     result = subprocess.run(
@@ -17,7 +34,6 @@ def get_real_disks():
 
     return disks
 
-
 def extract_temperature(output):
     for line in output.splitlines():
         if "Temperature_Celsius" in line:
@@ -34,24 +50,28 @@ def extract_temperature(output):
 
     return None
 
-
 def get_disk_temp(disk):
-    commands = [
-        ["sudo", "smartctl", "-A", disk],              # direto
-        ["sudo", "smartctl", "-A", "-d", "sat", disk], # USB
-        ["sudo", "smartctl", "-A", "-d", "scsi", disk]
-    ]
+    global CACHE
 
-    for cmd in commands:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+    dtype = CACHE.get(disk, "unknown")
 
-        if result.stdout:
-            temp = extract_temperature(result.stdout)
-            if temp is not None:
-                return temp
+    # nunca testado ainda
+    if dtype == "unknown":
+        dtype = detect_device_type(disk)
+        CACHE[disk] = dtype
+        save_cache(CACHE)
+
+    # não suporta → nem tenta mais
+    if dtype is None:
+        return None
+
+    cmd = ["sudo", "smartctl", "-A", "-d", dtype, disk]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.stdout:
+        return extract_temperature(result.stdout)
 
     return None
-
 
 def get_all_disk_temps():
     disks = get_real_disks()

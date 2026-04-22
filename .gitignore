@@ -5,3 +5,5 @@ logs/
 *.pyc
 *.pyo
 *.pyd
+app/data/*
+!app/data/.gitkeep

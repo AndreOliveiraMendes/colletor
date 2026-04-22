@@ -10,6 +10,7 @@ HWMON_PATH = os.path.join(BASE_SYS, 'power_supply')
 POWER_PATH = os.path.join(BASE_SYS, 'hwmon')
 SERVER = os.getenv("SERVER", "server")
 LOG_FOLDER = os.getenv("LOG_FOLDER", "/var/log")
+CACHE_FILE = os.getenv("CACHE_FILE", "app/data/disk_cache.json")
 
 
 def get_host_ip():
