@@ -4,7 +4,7 @@ from datetime import datetime
 from app.battery import get_power
 from app.cpu import get_cpu_temps, get_cpu_temps_hwmon
 from app.disk import get_all_disk_temps
-from app.tailscale import check_all
+from app.tailscale import check_all_network_node
 from app.utils import get_all_sys, get_sys_structure, print_structure
 
 
@@ -21,6 +21,9 @@ def debug():
 
     print("\n=== BATERY ===")
     print(get_power())
+    
+    print("\n=== tailscale ===")
+    print(check_all_network_node())
     
 def explore():
     sys_dirs = get_all_sys()
@@ -44,7 +47,7 @@ def explore():
         
 def new():
     print("=== testing new functions ===")
-    out = check_all()
+    out = check_all_network_node()
     
     for raw in out:
         data = [f"{key}:{value}" for key, value in raw.items()]

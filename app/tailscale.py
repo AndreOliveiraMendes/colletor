@@ -1,7 +1,22 @@
+import json
 import subprocess
 
 
+def get_self_ips():
+    result = subprocess.run(
+        ["tailscale", "status", "--json"],
+        capture_output=True,
+        text=True
+    )
+    data = json.loads(result.stdout)
+    return set(data["Self"]["TailscaleIPs"])
+
 def check_node(node):
+    self_ips = get_self_ips()
+
+    if node in self_ips:
+        return "direct (host)"
+
     for _ in range(3):
         result = subprocess.run(
             ["tailscale", "ping", "-c", "1", node],
@@ -10,12 +25,10 @@ def check_node(node):
         )
 
         out = result.stdout.lower()
-        
+
         if "pong" in out:
             if "via derp" in out:
-                return "relay"   # funcionando, mas indireto
-            return "direct"      # conexão direta
-        elif "is local" in out: # rodando de si mesmo
+                return "relay"
             return "direct"
 
     return "offline"
@@ -50,7 +63,7 @@ def get_nodes():
 
     return nodes
 
-def check_all():
+def check_all_network_node():
     nodes = get_nodes()
     result = []
 
