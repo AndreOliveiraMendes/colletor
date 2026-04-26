@@ -2,7 +2,7 @@ from datetime import datetime
 
 import requests
 
-from app.log import log_data
+from app.mem.log import log_data
 from config import SERVER
 
 

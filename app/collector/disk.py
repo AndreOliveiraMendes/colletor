@@ -1,6 +1,6 @@
 import subprocess
 
-from app.cache import load_cache, save_cache
+from app.mem.cache import load_cache, save_cache
 
 CACHE = load_cache()
 

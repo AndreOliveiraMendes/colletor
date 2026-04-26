@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from app.battery import get_power
-from app.cpu import get_cpu_temps_hwmon
-from app.disk import get_all_disk_temps
-from app.log import log_data
-from app.sender import send_to_api
-from app.tailscale import check_all_network_node
+from app.channel.sender import send_to_api
+from app.collector.battery import get_power
+from app.collector.cpu import get_cpu_temps_hwmon
+from app.collector.disk import get_all_disk_temps
+from app.collector.tailscale import check_all_network_node
+from app.mem.log import log_data
 from config import HOSTIP, HOSTNAME
 
 

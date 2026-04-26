@@ -1,8 +1,8 @@
 import argparse
 import os
 
-from app.run import run
-from app.test import test
+from app.runner.run import run
+from app.runner.test import test
 
 os.umask(0o022)
 

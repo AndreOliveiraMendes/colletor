@@ -1,10 +1,10 @@
 import json
 from datetime import datetime
 
-from app.battery import get_power
-from app.cpu import get_cpu_temps, get_cpu_temps_hwmon
-from app.disk import get_all_disk_temps
-from app.tailscale import check_all_network_node
+from app.collector.battery import get_power
+from app.collector.cpu import get_cpu_temps, get_cpu_temps_hwmon
+from app.collector.disk import get_all_disk_temps
+from app.collector.tailscale import check_all_network_node
 from app.utils import get_all_sys, get_sys_structure, print_structure
 
 

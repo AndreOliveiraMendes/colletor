@@ -28,3 +28,7 @@ HOSTIP = os.getenv("HOSTIP") or get_host_ip()
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+ROUTER_URL = os.getenv("ROUTER_URL")
+ROUTER_USER = os.getenv("ROUTER_USER")
+ROUTER_PASS = os.getenv("ROUTER_PASS")
