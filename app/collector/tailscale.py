@@ -14,9 +14,19 @@ def get_self_ips():
 def check_node(node):
     self_ips = get_self_ips()
 
+    # 🟢 caso: é o próprio host
     if node in self_ips:
-        return "direct (host)"
+        # verifica se o tailscale está ativo
+        status = subprocess.run(
+            ["tailscale", "status"],
+            capture_output=True
+        )
 
+        if status.returncode == 0:
+            return "self (online)"
+        return "self (error)"
+
+    # 🔵 caso: outros nodes
     for _ in range(3):
         result = subprocess.run(
             ["tailscale", "ping", "-c", "1", node],
@@ -76,13 +86,10 @@ def check_all_network_node():
             capture_output=True
         )
 
-        local_status = "up" if local.returncode == 0 else "down"
-
         result.append({
             "name": n["name"],
             "ip": n["ip"],
-            "tailscale": ts_status,
-            "local": local_status
+            "tailscale": ts_status
         })
 
     return result

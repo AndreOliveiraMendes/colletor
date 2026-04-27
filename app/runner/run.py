@@ -90,7 +90,8 @@ def run():
         send_datas.append(
             build_send_data("battery", "local", None, None, None, value, meta=data)
         )
-        
+
+    # 🔹 BATTERY (todo: add suport for multiple batteries)
     nodes = check_all_network_node()
     
     for raw in nodes:
@@ -115,7 +116,7 @@ def run():
                 raw.get('tailscale'),
                 meta={
                     "tailscale": raw.get('tailscale'),
-                    "local": raw.get('local')
+                    "local": False
                 }
             )
         ) 
