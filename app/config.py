@@ -12,7 +12,7 @@ COLLECTORS = {
     "cpu": get_cpu,
     "disk": get_disk,
     "battery": get_battery,
-    "tailscale": get_nodes,
+    "nodes": get_nodes,
 }
 
 PROCESSORS = {
@@ -39,19 +39,28 @@ def resolve_run(name, config):
         "collectors": collectors,
         "processors": processors
     }
-    
+
 def run_from_config(run_name, config):
     now = datetime.now()
     resolved = resolve_run(run_name, config)
 
     snapshot = {
-        "timestamp": now,
+        "timestamp": now.isoformat(),
         "metrics": []
     }
 
-    for collector in resolved["collectors"]:
-        snapshot["metrics"].extend(collector())
+    for name in resolved["collectors"]:
+        try:
+            fn = COLLECTORS[name]
+        except KeyError:
+            raise ValueError(f"Collector desconhecido: {name}")
 
-    for p in resolved["processors"]:
-        fn = PROCESSORS[p]
+        snapshot["metrics"].extend(fn())
+
+    for name in resolved["processors"]:
+        try:
+            fn = PROCESSORS[name]
+        except KeyError:
+            raise ValueError(f"Processor desconhecido: {name}")
+
         fn(snapshot)
