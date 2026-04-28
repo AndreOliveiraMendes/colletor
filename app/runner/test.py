@@ -44,24 +44,15 @@ def explore():
                 json.dump(structure, f, indent=2)
     else:
         print("diretorio inexistente")
-        
-def new():
-    print("=== testing new functions ===")
-    out = check_all_network_node()
-    
-    for raw in out:
-        data = [f"{key}:{value}" for key, value in raw.items()]
-        print(", ".join(data))
 
 options = {
     "d":debug,
-    "e":explore,
-    "n":new
+    "e":explore
 }
 
 def test():
     print("this is test mode")
-    x = input("choose your option:\n[d: debug, e: explore, n: new functions]\n")
+    x = input("choose your option:\n[d: debug, e: explore]\n")
 
     if x in options:
         options[x]()
