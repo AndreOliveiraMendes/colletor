@@ -97,12 +97,6 @@ def run():
         send_datas.append(
             build_send_data("battery", "local", None, "battery", None, value, meta=battery)
         )
-<<<<<<< HEAD
-
-    # 🔹 BATTERY (todo: add suport for multiple batteries)
-    nodes = check_all_network_node()
-=======
->>>>>>> 10f9e72 (feat: refactor data collection in run function and enhance build_send_data structure)
     
     for raw in nodes:
         log_data(
