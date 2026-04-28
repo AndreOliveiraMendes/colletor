@@ -1,10 +1,10 @@
 import json
 from datetime import datetime
 
-from app.collector.battery import get_power
+from app.collector.battery import get_battery
 from app.collector.cpu import get_cpu_temps, get_cpu_temps_hwmon
 from app.collector.disk import get_all_disk_temps
-from app.collector.tailscale import check_all_network_node
+from app.collector.tailscale import get_nodes
 from app.utils import get_all_sys, get_sys_structure, print_structure
 
 
@@ -20,10 +20,10 @@ def debug():
     print(get_all_disk_temps())
 
     print("\n=== BATERY ===")
-    print(get_power())
+    print(get_battery())
     
     print("\n=== tailscale ===")
-    print(check_all_network_node())
+    print(get_nodes())
     
 def explore():
     sys_dirs = get_all_sys()

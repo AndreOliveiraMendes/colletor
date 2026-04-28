@@ -11,39 +11,8 @@ def get_self_ips():
     data = json.loads(result.stdout)
     return set(data["Self"]["TailscaleIPs"])
 
-def check_node(node):
-    self_ips = get_self_ips()
 
-    # 🟢 caso: é o próprio host
-    if node in self_ips:
-        # verifica se o tailscale está ativo
-        status = subprocess.run(
-            ["tailscale", "status"],
-            capture_output=True
-        )
-
-        if status.returncode == 0:
-            return "self (online)"
-        return "self (error)"
-
-    # 🔵 caso: outros nodes
-    for _ in range(3):
-        result = subprocess.run(
-            ["tailscale", "ping", "-c", "1", node],
-            capture_output=True,
-            text=True
-        )
-
-        out = result.stdout.lower()
-
-        if "pong" in out:
-            if "via derp" in out:
-                return "relay"
-            return "direct"
-
-    return "offline"
-
-def get_nodes():
+def list_nodes_raw():
     result = subprocess.run(
         ["tailscale", "status"],
         capture_output=True,
@@ -57,39 +26,60 @@ def get_nodes():
             continue
 
         parts = line.split()
-
         if len(parts) < 2:
             continue
 
-        ip = parts[0]
-        name = parts[1]
-        status = "online" if "offline" not in line else "offline"
-
         nodes.append({
-            "ip": ip,
-            "name": name,
-            "status": status
+            "ip": parts[0],
+            "name": parts[1],
         })
 
     return nodes
 
-def check_all_network_node():
-    nodes = get_nodes()
-    result = []
-
-    for n in nodes:
-        ts_status = check_node(n["ip"])
-
-        # exemplo simples de ping local
-        local = subprocess.run(
-            ["ping", "-c", "1", n["ip"]],
+def check_node(node_ip, self_ips):
+    # self
+    if node_ip in self_ips:
+        status = subprocess.run(
+            ["tailscale", "status"],
             capture_output=True
         )
+        return "self (online)" if status.returncode == 0 else "self (error)"
 
-        result.append({
+    # outros
+    for _ in range(3):
+        result = subprocess.run(
+            ["tailscale", "ping", "-c", "1", node_ip],
+            capture_output=True,
+            text=True
+        )
+
+        out = result.stdout.lower()
+
+        if "pong" in out:
+            return "relay" if "via derp" in out else "direct"
+
+    return "offline"
+
+def get_nodes():
+    nodes = list_nodes_raw()
+    self_ips = get_self_ips()
+
+    metrics = []
+
+    for n in nodes:
+        ts_status = check_node(n["ip"], self_ips)
+
+        metrics.append({
+            "type": "network",
+            "device": "tailscale",
+            "source": "remote",
+            "target": n["name"],
             "name": n["name"],
-            "ip": n["ip"],
-            "tailscale": ts_status
+            "value": n["ip"],
+            "meta": {
+                "tailscale": ts_status,
+                "local": n["ip"] in self_ips
+            }
         })
 
-    return result
+    return metrics

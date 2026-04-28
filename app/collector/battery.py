@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from app.utils import read
 from config import HWMON_PATH
@@ -21,12 +20,19 @@ def find_power_devices():
     return ac_path, bat_path
 
 
-def get_power():
+def get_battery():
     ac_path, bat_path = find_power_devices()
 
-    return {
-        "timestamp": datetime.now().isoformat(),
+    data = {
         "ac_online": read(f"{ac_path}/online") == "1" if ac_path else None,
         "status": read(f"{bat_path}/status") if bat_path else None,
         "capacity": int(read(f"{bat_path}/capacity") or 0) if bat_path else None,
     }
+
+    return [{
+        "type": "battery",
+        "source": "local",
+        "device": "battery",
+        "value": data["capacity"],
+        "meta": data
+    }]

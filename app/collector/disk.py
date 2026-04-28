@@ -82,3 +82,18 @@ def get_all_disk_temps():
         temps[d] = temp if temp is not None else None
 
     return temps
+
+def get_disk():
+    out = []
+
+    for path, value in get_all_disk_temps().items():
+        out.append({
+            "type": "temperature",
+            "device": "DISK",
+            "source": "local",
+            "name": path.split("/")[-1],
+            "value": value,
+            "meta": {"path": path}
+        })
+
+    return out

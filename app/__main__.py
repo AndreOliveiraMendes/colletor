@@ -1,10 +1,12 @@
 import argparse
 import os
 
-from app.runner.run import run1, run2
+from app.config import load_config, run_from_config
 from app.runner.test import test
 
 os.umask(0o022)
+
+config = load_config()
 
 def main():
     parser = argparse.ArgumentParser(description="Hardware Monitor")
@@ -15,9 +17,9 @@ def main():
     run_parser = subparsers.add_parser("run", help="Run collector")
     run_sub = run_parser.add_subparsers(dest="run_mode")
 
-    run_sub.add_parser("base", help="CPU/Disk/Battery")
-    run_sub.add_parser("node", help="Network nodes")
-    run_sub.add_parser("all", help="Run everything")
+    for run_name, run_cfg in config.get("runs", {}).items():
+        help_text = run_cfg.get("description", f"Run {run_name}")
+        run_sub.add_parser(run_name, help=help_text)
 
     # 🔹 test
     subparsers.add_parser("test", help="Run tests")
@@ -28,16 +30,8 @@ def main():
         test()
 
     elif args.command == "run":
-        # default → base
-        if args.run_mode is None or args.run_mode == "base":
-            run1()
-
-        elif args.run_mode == "node":
-            run2()
-
-        elif args.run_mode == "all":
-            run1()
-            run2()
+        mode = args.run_mode or "base"
+        run_from_config(mode, config)
 
     else:
         parser.print_help()

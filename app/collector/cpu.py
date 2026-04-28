@@ -57,3 +57,15 @@ def get_cpu_temps_hwmon():
         return temps
 
     return []
+
+def get_cpu():
+    return [
+        {
+            "type": "temperature",
+            "device": "CPU",
+            "source": "local",
+            "name": name,
+            "value": value
+        }
+        for name, value in get_cpu_temps_hwmon()
+    ]
