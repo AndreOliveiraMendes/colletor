@@ -30,117 +30,137 @@ def build_send_data(info_type, info_source, target, device_type, name, value, va
 
     return data
 
-def collect_snapshot():
+def collect_snapshot_1():
     timestamp = datetime.now().isoformat()
 
     return {
         "timestamp": timestamp,
         "cpu": get_cpu_temps_hwmon(),
         "disk": get_all_disk_temps(),
-        "battery": get_power(),
+        "battery": get_power()
+    }
+
+def collect_snapshot_2():
+    timestamp = datetime.now().isoformat()
+
+    return {
+        "timestamp": timestamp,
         "nodes": check_all_network_node()
     }
     
 def log_datas(snapshot):
-    for name, value in snapshot.get('cpu'):
-        log_data(
-            {
-                "timestamp": snapshot.get('timestamp'),
-                "name": name,
-                "temperature": value
-            },
-            "cpu_temperature"
-        )
+    if 'cpu' in snapshot:
+        for name, value in snapshot.get('cpu'):
+            log_data(
+                {
+                    "timestamp": snapshot.get('timestamp'),
+                    "name": name,
+                    "temperature": value
+                },
+                "cpu_temperature"
+            )
         
-    for path, value in snapshot.get('disk').items():
-        real_name = path.split("/")[-1]  # mais simples
+    if 'disk' in snapshot:
+        for path, value in snapshot.get('disk').items():
+            real_name = path.split("/")[-1]  # mais simples
 
-        path_file = "disk_temperature" if value else "disk_temperature_strange"
+            path_file = "disk_temperature" if value else "disk_temperature_strange"
+            log_data(
+                {
+                    "timestamp": snapshot.get('timestamp'),
+                    "name": real_name,
+                    "temperature": value,
+                    "device": path
+                },
+                path_file
+            )
+    
+    if 'battery' in snapshot:
+        battery = snapshot.get('battery')
+        ac_connected = battery.get("ac_online")
+        status = battery.get("status")
+        value = battery.get("capacity")
+    
         log_data(
             {
                 "timestamp": snapshot.get('timestamp'),
-                "name": real_name,
-                "temperature": value,
-                "device": path
+                "ac_connected": ac_connected,
+                "status": status,
+                "value": value
             },
-            path_file
+            "battery"
         )
     
-    battery = snapshot.get('battery')
-    ac_connected = battery.get("ac_online")
-    status = battery.get("status")
-    value = battery.get("capacity")
-    
-    log_data(
-        {
-            "timestamp": snapshot.get('timestamp'),
-            "ac_connected": ac_connected,
-            "status": status,
-            "value": value
-        },
-        "battery"
-    )
-    
-    for raw in snapshot.get('nodes'):
-        log_data(
-            {
-                "timestamp": snapshot.get('timestamp'),
-                "node": raw.get('name'),
-                "tailscale": raw.get('tailscale'),
-                "local": raw.get('local')
-            },
-            "node"
-        )
+    if 'nodes' in snapshot:
+        for raw in snapshot.get('nodes'):
+            log_data(
+                {
+                    "timestamp": snapshot.get('timestamp'),
+                    "node": raw.get('name'),
+                    "tailscale": raw.get('tailscale'),
+                    "local": raw.get('local')
+                },
+                "node"
+            )
         
 def process_and_send(snapshot):
     send_datas = []
     
-    for name, value in snapshot.get('cpu'):
-        send_datas.append(
-            build_send_data("temperature", "local", None, "CPU", name, value)
-        )
-
-    # 🔹 DISK
-    for path, value in snapshot.get('disk').items():
-        real_name = path.split("/")[-1]  # mais simples
-
-        if value is not None:
+    if 'cpu' in snapshot:
+        for name, value in snapshot.get('cpu'):
             send_datas.append(
-                build_send_data("temperature", "local", None, "DISK", real_name, value, meta=path)
+                build_send_data("temperature", "local", None, "CPU", name, value)
             )
-    
-    battery = snapshot.get('battery')
-    ac_connected = battery.get("ac_online")
-    status = battery.get("status")
-    value = battery.get("capacity")
-    
-    if value:
-        send_datas.append(
-            build_send_data("battery", "local", None, "battery", None, value, meta=battery)
-        )
 
-    for raw in snapshot.get('nodes'):
-        send_datas.append(
-            build_send_data(
-                "network",
-                "remote",
-                raw.get('name'),
-                'tailscale',
-                raw.get('name'),
-                raw.get('ip'),
-                raw.get('tailscale'),
-                meta={
-                    "tailscale": raw.get('tailscale'),
-                    "local": False
-                }
+    if 'disk' in snapshot:
+        for path, value in snapshot.get('disk').items():
+            real_name = path.split("/")[-1]  # mais simples
+
+            if value is not None:
+                send_datas.append(
+                    build_send_data("temperature", "local", None, "DISK", real_name, value, meta=path)
+                )
+    
+    if 'battery' in snapshot:
+        battery = snapshot.get('battery')
+        ac_connected = battery.get("ac_online")
+        status = battery.get("status")
+        value = battery.get("capacity")
+    
+        if value:
+            send_datas.append(
+                build_send_data("battery", "local", None, "battery", None, value, meta=battery)
             )
-        ) 
+
+    if 'nodes' in snapshot:
+        for raw in snapshot.get('nodes'):
+            send_datas.append(
+                build_send_data(
+                    "network",
+                    "remote",
+                    raw.get('name'),
+                    'tailscale',
+                    raw.get('name'),
+                    raw.get('ip'),
+                    raw.get('tailscale'),
+                    meta={
+                        "tailscale": raw.get('tailscale'),
+                        "local": False
+                    }
+                )
+            ) 
 
     if send_datas:
         send_to_api(send_datas) 
 
-def run():
-    snapshot = collect_snapshot()
+def run1():
+    snapshot = collect_snapshot_1()
     
     log_datas(snapshot)
+    process_and_send(snapshot)
+
+def run2():
+    snapshot = collect_snapshot_2()
+
+    log_data(snapshot)
     process_and_send(snapshot)
