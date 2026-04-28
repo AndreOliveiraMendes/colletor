@@ -18,7 +18,8 @@ def build_send_data(info_type, info_source, target, device_type, name, value, va
         "target": target,
         "device_type": device_type,
         "name": name,
-        "value": value
+        "value": value,
+        "metric": f"{info_type}.{device_type}"
     }
     
     if value_text:
@@ -30,11 +31,21 @@ def build_send_data(info_type, info_source, target, device_type, name, value, va
     return data
 
 def run():
+    # setup
     timestamp = datetime.now().isoformat()
     send_datas = []
-
+    
+    # collect data
+    
+    temps_cpu = get_cpu_temps_hwmon()
+    temps_disk = get_all_disk_temps()
+    battery = get_power()
+    nodes = check_all_network_node()
+    
+    # log and send
+    
     # 🔹 CPU
-    for name, value in get_cpu_temps_hwmon():
+    for name, value in temps_cpu:
         log_data(
             {
                 "timestamp": timestamp,
@@ -49,7 +60,7 @@ def run():
         )
 
     # 🔹 DISK
-    for path, value in get_all_disk_temps().items():
+    for path, value in temps_disk.items():
         real_name = path.split("/")[-1]  # mais simples
 
         path_file = "disk_temperature" if value else "disk_temperature_strange"
@@ -67,14 +78,10 @@ def run():
             send_datas.append(
                 build_send_data("temperature", "local", None, "DISK", real_name, value, meta=path)
             )
-            
-    # 🔹 BATTERY (todo: add suport for multiple batteries)
-    data = get_power()
     
-    timestamp = data.get("timestamp")
-    ac_connected = data.get("ac_online")
-    status = data.get("status")
-    value = data.get("capacity")
+    ac_connected = battery.get("ac_online")
+    status = battery.get("status")
+    value = battery.get("capacity")
     
     log_data(
         {
@@ -88,11 +95,14 @@ def run():
     
     if value:
         send_datas.append(
-            build_send_data("battery", "local", None, None, None, value, meta=data)
+            build_send_data("battery", "local", None, "battery", None, value, meta=battery)
         )
+<<<<<<< HEAD
 
     # 🔹 BATTERY (todo: add suport for multiple batteries)
     nodes = check_all_network_node()
+=======
+>>>>>>> 10f9e72 (feat: refactor data collection in run function and enhance build_send_data structure)
     
     for raw in nodes:
         log_data(
