@@ -28,7 +28,6 @@ def main():
         test()
 
     elif args.command == "run":
-        print(args.run_mode)
         # default → base
         if args.run_mode is None or args.run_mode == "base":
             run1()

@@ -162,5 +162,5 @@ def run1():
 def run2():
     snapshot = collect_snapshot_2()
 
-    log_data(snapshot)
+    log_datas(snapshot)
     process_and_send(snapshot)
