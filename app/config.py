@@ -20,7 +20,7 @@ PROCESSORS = {
     "send": process_and_send,
 }
 
-def load_config(path="runs.yaml"):
+def load_config(path="data/runs.yaml"):
     with open(path, "r") as f:
         return yaml.safe_load(f)
 

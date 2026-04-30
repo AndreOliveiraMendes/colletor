@@ -6,4 +6,5 @@ logs/
 *.pyo
 *.pyd
 app/data/*
+data/*.yaml
 !app/data/.gitkeep
