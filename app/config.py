@@ -24,11 +24,20 @@ def load_config(path="data/runs.yaml"):
     with open(path, "r") as f:
         return yaml.safe_load(f)
 
+def normalize_item(item):
+    if isinstance(item, str):
+        return {"name": item, "params": {}}
+    elif isinstance(item, dict):
+        name, params = next(iter(item.items()))
+        return {"name": name, "params": params or {}}
+    else:
+        raise ValueError(f"Formato inválido: {item}")
+
 def resolve_run(name, config):
     run = config["runs"][name]
 
-    collectors = list(run.get("collectors", []))
-    processors = list(run.get("processors", []))
+    collectors = [normalize_item(c) for c in run.get("collectors", [])]
+    processors = [normalize_item(p) for p in run.get("processors", [])]
 
     for included in run.get("include", []):
         sub = resolve_run(included, config)
@@ -49,18 +58,24 @@ def run_from_config(run_name, config):
         "metrics": []
     }
 
-    for name in resolved["collectors"]:
+    for item in resolved["collectors"]:
+        name = item["name"]
+        params = item["params"]
+
         try:
             fn = COLLECTORS[name]
         except KeyError:
             raise ValueError(f"Collector desconhecido: {name}")
 
-        snapshot["metrics"].extend(fn())
+        snapshot["metrics"].extend(fn(**params))
 
-    for name in resolved["processors"]:
+    for item in resolved["processors"]:
+        name = item["name"]
+        params = item["params"]
+
         try:
             fn = PROCESSORS[name]
         except KeyError:
             raise ValueError(f"Processor desconhecido: {name}")
 
-        fn(snapshot)
+        fn(snapshot, **params)

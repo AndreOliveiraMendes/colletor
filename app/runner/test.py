@@ -22,8 +22,14 @@ def debug():
     print("\n=== BATERY ===")
     print(get_battery())
     
-    print("\n=== tailscale ===")
-    print(get_nodes())
+    print("\n=== tailscale 1===")
+    print(get_nodes("simplified"))
+    
+    print("\n=== tailscale 2===")
+    print(get_nodes("normal"))
+
+    print("\n=== tailscale 3===")
+    print(get_nodes("detailed"))
     
 def explore():
     sys_dirs = get_all_sys()
