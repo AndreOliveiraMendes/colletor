@@ -33,7 +33,9 @@ def ping_node(ip):
 
     return status, latency
 
-
+def normalize_names(dns):
+    return dns.split(".")[0]
+    
 def get_nodes(mode="simplified"):
     data = tailscale_status_json()
 
@@ -45,7 +47,7 @@ def get_nodes(mode="simplified"):
     for node in all_nodes:
         ips = node.get("TailscaleIPs", [])
         ip = ips[0] if ips else None
-        name = node.get("HostName") or node.get("DNSName")
+        name = normalize_names(node.get("DNSName"))
 
         is_self = ip in self_ips
         online = node.get("Online", False)
