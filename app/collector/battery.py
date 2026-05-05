@@ -23,10 +23,27 @@ def find_power_devices():
 def get_battery():
     ac_path, bat_path = find_power_devices()
 
+    if not bat_path:
+        return []
+
+    def safe_int(path):
+        val = read(path)
+        return int(val) if val and val.isdigit() else None
+
+    charge_full = safe_int(f"{bat_path}/charge_full")
+    charge_full_design = safe_int(f"{bat_path}/charge_full_design")
+
+    health = None
+    if charge_full and charge_full_design:
+        health = round((charge_full / charge_full_design) * 100, 2)
+
     data = {
         "ac_online": read(f"{ac_path}/online") == "1" if ac_path else None,
-        "status": read(f"{bat_path}/status") if bat_path else None,
-        "capacity": int(read(f"{bat_path}/capacity") or 0) if bat_path else None,
+        "status": read(f"{bat_path}/status"),
+        "capacity": safe_int(f"{bat_path}/capacity"),
+        "health": health,
+        "charge_now": safe_int(f"{bat_path}/charge_now"),
+        "cycle_count": safe_int(f"{bat_path}/cycle_count"),
     }
 
     return [{
