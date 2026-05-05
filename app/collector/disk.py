@@ -1,22 +1,5 @@
 import subprocess
-
-from app.mem.cache import load_cache, save_cache
-
-CACHE = load_cache()
-
-def detect_device_type(disk):
-    types = ["auto", "sat", "sat,12", "sat,16", "scsi"]
-
-    for t in types:
-        cmd = ["sudo", "smartctl", "-A", "-d", t, disk, "-T", "permissive"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-
-        if result.stdout:
-            temp = extract_temperature(result.stdout)
-            if temp is not None:
-                return t
-
-    return None
+import json
 
 def get_real_disks():
     result = subprocess.run(
@@ -34,66 +17,43 @@ def get_real_disks():
 
     return disks
 
-def extract_temperature(output):
-    for line in output.splitlines():
-        if "Temperature_Celsius" in line:
-            try:
-                return int(line.split()[-1])
-            except:
-                pass
-
-        elif "Airflow_Temperature_Cel" in line:
-            try:
-                return int(line.split()[9])  # fallback
-            except:
-                pass
-
-    return None
-
-def get_disk_temp(disk):
-    global CACHE
-
-    dtype = CACHE.get(disk, "unknown")
-
-    # nunca testado ainda
-    if dtype == "unknown":
-        dtype = detect_device_type(disk)
-        CACHE[disk] = dtype
-        save_cache(CACHE)
-
-    # não suporta → nem tenta mais
-    if dtype is None:
-        return None
-
-    cmd = ["sudo", "smartctl", "-A", "-d", dtype, disk]
+def get_disk_info(disk):
+    cmd = ["sudo", "smartctl", "-a", "--json", disk]
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    if result.stdout:
-        return extract_temperature(result.stdout)
+    if not result.stdout:
+        return None
 
-    return None
+    try:
+        data = json.loads(result.stdout)
+    except:
+        return None
 
-def get_all_disk_temps():
-    disks = get_real_disks()
-    temps = {}
-
-    for d in disks:
-        temp = get_disk_temp(d)
-        temps[d] = temp if temp is not None else None
-
-    return temps
+    return data
 
 def get_disk():
     out = []
 
-    for path, value in get_all_disk_temps().items():
+    for disk in get_real_disks():
+        data = get_disk_info(disk)
+
+        if not data:
+            continue
+
+        temp = data.get("temperature", {}).get("current")
+
         out.append({
             "type": "temperature",
-            "device": "DISK",
+            "device": "disk",
             "source": "local",
-            "name": path.split("/")[-1],
-            "value": value,
-            "meta": {"path": path}
+            "name": disk.split("/")[-1],
+            "value": temp,
+            "meta": {
+                "path": disk,
+                "model": data.get("model_name"),
+                "health": data.get("smart_status", {}).get("passed"),
+                "power_on_hours": data.get("power_on_time", {}).get("hours"),
+            }
         })
 
     return out

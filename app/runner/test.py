@@ -3,7 +3,7 @@ from datetime import datetime
 
 from app.collector.battery import get_battery
 from app.collector.cpu import get_cpu_temps, get_cpu_temps_hwmon
-from app.collector.disk import get_all_disk_temps
+from app.collector.disk import get_disk
 from app.collector.tailscale import get_nodes
 from app.utils import get_all_sys, get_sys_structure, print_structure
 
@@ -17,7 +17,7 @@ def debug():
     print(get_cpu_temps_hwmon())
 
     print("\n=== DISK ===")
-    print(get_all_disk_temps())
+    print(get_disk())
 
     print("\n=== BATERY ===")
     print(get_battery())
