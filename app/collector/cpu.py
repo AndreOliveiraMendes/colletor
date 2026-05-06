@@ -58,7 +58,7 @@ def get_cpu_temps_hwmon():
 
     return []
 
-def get_cpu():
+def get_cpu_temperature():
     return [
         {
             "type": "temperature",

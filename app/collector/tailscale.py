@@ -1,6 +1,7 @@
-import subprocess
 import json
 import re
+import subprocess
+
 
 def tailscale_status_json():
     result = subprocess.run(
