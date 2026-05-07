@@ -17,7 +17,7 @@ def get_cpu_temps():
 
     for chip in data.values():
         for key, value in chip.items():
-            if "Core" in key:
+            if "Core" in key or "Package" in key:
                 for k, v in value.items():
                     if k.endswith("_input"):
                         temps.append((key, int(v)))
@@ -68,4 +68,16 @@ def get_cpu_temperature():
             "value": value
         }
         for name, value in get_cpu_temps_hwmon()
+    ]
+    
+def get_cpu_temperature_sensors():
+    return [
+        {
+            "type": "temperature",
+            "device": "CPU",
+            "source": "local",
+            "name": name,
+            "value": value
+        }
+        for name, value in get_cpu_temps()
     ]

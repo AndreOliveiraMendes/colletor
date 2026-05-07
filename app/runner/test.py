@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from app.collector.battery import get_battery
-from app.collector.cpu import get_cpu_temps, get_cpu_temps_hwmon
+from app.collector.cpu import get_cpu_temperature_sensors, get_cpu_temps_hwmon
 from app.collector.disk import get_disk_health, get_disk_temperature
 from app.collector.tailscale import get_nodes
 from app.utils import get_all_sys, get_sys_structure, print_structure
@@ -11,7 +11,7 @@ from app.utils import get_all_sys, get_sys_structure, print_structure
 def debug():
     print("=== CPU ===")
     print("=== sensors ===")
-    print(get_cpu_temps())
+    print(get_cpu_temperature_sensors())
 
     print("=== hwmon ===")
     print(get_cpu_temps_hwmon())

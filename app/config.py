@@ -3,13 +3,14 @@ from datetime import datetime
 import yaml
 
 from app.collector.battery import get_battery
-from app.collector.cpu import get_cpu_temperature
+from app.collector.cpu import get_cpu_temperature, get_cpu_temperature_sensors
 from app.collector.disk import get_disk_health, get_disk_temperature
 from app.collector.tailscale import get_nodes
 from app.runner.run import log_datas, process_and_send
 
 COLLECTORS = {
     "cpu_temperature": get_cpu_temperature,
+    "cpu_temperature_sensors": get_cpu_temperature_sensors,
     "disk_temperature": get_disk_temperature,
     "disk_health": get_disk_health,
     "battery": get_battery,
